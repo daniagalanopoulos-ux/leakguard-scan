@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: leakguard
+        name: LeakGuard — Sensitive Data Scanner
+        entry: leakguard scan . --min-severity medium
+        language: system
+        pass_filenames: false
+        always_run: true

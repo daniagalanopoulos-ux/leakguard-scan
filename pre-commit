@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# LeakGuard pre-commit hook
+# Install: cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# Or use with pre-commit framework (see .pre-commit-config.yaml)
+
+set -e
+
+echo "🔍 LeakGuard: Scanning staged files for sensitive data..."
+
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+if [ -z "$STAGED_FILES" ]; then
+    echo "✔ No staged files to scan."
+    exit 0
+fi
+
+# Write staged files to a temp dir and scan them
+TMPDIR=$(mktemp -d)
+trap "rm -rf $TMPDIR" EXIT
+
+for file in $STAGED_FILES; do
+    if [ -f "$file" ]; then
+        mkdir -p "$TMPDIR/$(dirname $file)"
+        git show ":$file" > "$TMPDIR/$file" 2>/dev/null || true
+    fi
+done
+
+# Run LeakGuard
+if command -v leakguard &>/dev/null; then
+    leakguard scan "$TMPDIR" --min-severity medium
+    EXIT_CODE=$?
+else
+    echo "⚠ LeakGuard not found. Install with: pip install leakguard"
+    exit 0
+fi
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo ""
+    echo "❌ LeakGuard found sensitive data in staged files."
+    echo "   Fix the findings above, or add false positives to .scannerignore"
+    echo "   To bypass (not recommended): git commit --no-verify"
+    exit 1
+fi
+
+echo "✔ LeakGuard: No sensitive data found."
+exit 0

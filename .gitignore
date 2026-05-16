@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+.env
+
+# Testing
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Type checking
+.mypy_cache/
+
+# Ruff / Black
+.ruff_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# LeakGuard outputs
+results.sarif
+results.json
+.leakguard-baseline.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test fixtures contain intentional fake secrets for scanner testing
+# These are not real credentials
+tests/fixtures/
